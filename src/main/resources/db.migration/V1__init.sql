@@ -2,12 +2,12 @@ CREATE TABLE VoucherTable
 (
 	[ID] INT NOT NULL PRIMARY KEY IDENTITY(1,1),
 	VoucherCode  int  UNIQUE,
-	ClientID [INT] FOREIGN KEY REFERENCES ClientTable(ID),
-	CampaignID [INT] FOREIGN KEY REFERENCES CampaignTable(ID),
+	[ClientID] [INT] FOREIGN KEY REFERENCES ClientTable(ID),
+	[CampaignID] [INT] FOREIGN KEY REFERENCES CampaignTable(ID),
 	AmountDiscounted int NULLABLE,
 	PercentDiscount int NULLABLE,
 	UnitDiscounted int NULLABLE,
-	IsDisabled bit default 0,
+	IsDisabled bit default 1,
 	VoucherType varchar(10) NO NULL,
 	Expirydate date
 	)
@@ -17,7 +17,7 @@ GO
 CREATE TABLE CampaignTable
 (
 	[ID] INT NOT NULL,
-	ClientID [INT] FOREIGN KEY REFERENCES ClientTable(ID),
+	[ClientID] [INT] FOREIGN KEY REFERENCES ClientTable(ID),
 	CampaignName varchar(20)
 	)
 
@@ -48,7 +48,7 @@ GO
 CREATE PROCEDURE [dbo].[uspCreateAmountVoucher]
 (
 	@voucherCode varchar(MAX),
-	@campaignID varchar(50),
+	@campaignName varchar(50),
 	@amountDiscounted int ,
 	@voucherType varchar,
 	@clientID int,
@@ -64,18 +64,26 @@ BEGIN TRANSACTION
 
 	IF(@voucherId > 0)
 	    UPDATE VoucherTable SET VoucherCode = @voucherCode, AmountDiscounted = @amountDiscounted,
-	      VoucherType = @voucherType,
-	    Expirydate = @expirydate, CampaignID = @campaignID, ClientID = @clientID
+	      VoucherType = @voucherType, Expirydate = @expirydate
 
 	ELSE
 
 	BEGIN
-        INSERT INTO VoucherTable(VoucherCode, ClientID, CampaignID, AmountDiscounted,
-         VoucherType, Expirydate)
-        VALUES(@VoucherCode,@clientID, @campaignID, @amountDiscounted, @expirydate)
+
+	 INSERT INTO ClientTable(CllientID)
+	 VALUES (@cllientID)
+
+	INSERT INTO CampaignTable([ClientID], CampaignName)
+	 VALUES (, @campaignName)
+
+
+
+
+	 INSERT INTO VoucherTable(VoucherCode, ClientID, CampaignID, AmountDiscounted, VoucherType, Expirydate)
+        VALUES(@VoucherCode,@clientID, , @amountDiscounted, @expirydate)
         SELECT @voucherId = SCOPE_IDENTITY()
 
-        INSERT INTO CampaignTable()
+
 
 	END
 
